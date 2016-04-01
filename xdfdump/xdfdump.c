@@ -235,17 +235,7 @@ int
 xdf_get_file(FILE *fd, struct xdf_file *xf)
 {
 	char buf[4];
-#if 0
-	off_t size;
 
-	if (fseeko(fd, 0L, SEEK_END)) {
-		perror("xdf_get_file:fseek");
-		return 1;
-	}
-
-	size = ftello(fd);
-	rewind(fd);
-#endif
 	if (fread(buf, sizeof(buf), 1, fd) != 1) {
 		perror ("xdf_get_file:read");
 		return 1;
@@ -259,9 +249,6 @@ xdf_get_file(FILE *fd, struct xdf_file *xf)
 	memset(xf, 0, sizeof(*xf));
 
 	xf->xf_fd = fd;
-#if 0
-	xf->xf_size = size;
-#endif
 	xf->xf_pos = sizeof(buf);
 
 	return 0;
@@ -305,23 +292,7 @@ int
 xdf_next_chunk(struct xdf_file *xf, struct xdf_chunk *c)
 {
 	off_t off;
-#if 0
-	if (c->ch_offset > xf->xf_size ||
-	    c->ch_length > (xf->xf_size - c->ch_offset)) {
-		fprintf(stderr, "ch_offset:%llu, ch_length:%llu, xf_size:%llu\n",
-			c->ch_offset, c->ch_length, xf->xf_size);
-		return 1;
-	}
 
-	if (fseeko(xf->xf_fd, c->ch_offset + c->ch_length, SEEK_SET)) {
-		perror("xdf_next_chunk:fseek:");
-		return 1;
-	}
-
-	/* end of file */
-	if (c->ch_offset + c->ch_length == xf->xf_size)
-		return -1;
-#endif
 	if (c->ch_offset > xf->xf_pos)
 		return 1;
 	if (c->ch_length < (xf->xf_pos - c->ch_offset))
